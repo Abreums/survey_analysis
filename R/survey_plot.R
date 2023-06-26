@@ -5,12 +5,6 @@
 
 # summary plot
 plot_survey_by <- function(df, a_column) {
-  #   the_table <-
-  #     df |>
-  #     count({{a_column}}, sort = T) |>
-  #     mutate(Prop = scales::percent(n / sum(n))) |> 
-  #     select({{a_column}}, Prop)
-  
   df |>
     count({{a_column}}, sort = T) |> 
     mutate(prop = n/sum(n)) |> 
@@ -20,12 +14,6 @@ plot_survey_by <- function(df, a_column) {
          x = str_to_title(deparse(substitute(a_column))),
          y = NULL) +
     theme_minimal() 
-  # +
-  #   annotate(geom = "table",
-  #            x = 7,
-  #            y = 50, 
-  #            label = list(the_table))
-  # 
 }
 
 

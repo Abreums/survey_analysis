@@ -183,4 +183,4 @@ plot_likert_by(survey_data, cat_engagement)
 plot_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
 ```
 
-e...
+Vamos avaliar por grupo de linha, turno, contrato.
