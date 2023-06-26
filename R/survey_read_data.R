@@ -10,7 +10,7 @@
 # Than it skips the 2 first lines and read the data
 # Finally it applies the first line as header of the data 
 #
-readSurveyMonkeyData <- function(folder, file_name) {
+read_survey_monkey_data <- function(folder, file_name) {
   
   file_list <- list.files(path = folder,
                           pattern = "*.xlsx",
@@ -80,7 +80,7 @@ get_respondent_data <- function(survey_data, extra_columns) {
   } else {
     df <- 
       survey_data |> 
-      select(1:8, extra_columns)
+      select(1:8, all_of(extra_columns))
     names(df) <- c(names(df[1:8]), names(extra_columns))  
   }
   

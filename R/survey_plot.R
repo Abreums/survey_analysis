@@ -29,15 +29,14 @@ lik_colors = c(
 )
 
 plot_all_likert_data <- function(survey_data) {
-  
-  survey_data  |>
-    select(matches("^Q[01][[:digit:]][[:blank:]]")) |> 
+  survey_data  |> 
+    select(matches("^Q[01][[:digit:]][[:blank:]]")) |>  
     pivot_longer(cols = everything(),
                  names_to = "question",
                  values_to = "answer") |> 
-    filter(!is.na(answer)) |> 
+    filter(!is.na(answer)) |>
     group_by(question) |>
-    count(answer) |>
+    count(answer) |> 
     mutate(p = n / sum(n)) |> 
     ggplot(aes(
       fct_rev(question),
@@ -47,9 +46,13 @@ plot_all_likert_data <- function(survey_data) {
       fill = forcats::fct_rev(answer)
     )) +
     geom_col(position = "stack") +
-    geom_text(size = 3, position = position_stack(vjust = 0.5)) +
+    #geom_text(size = 3, position = position_stack(vjust = 0.5)) +
+    annotate("text", x = 0.0, y = 0, label = "Discordo totalmente", 
+             color = lik_colors[1], hjust = 0, vjust = 0) +
+    annotate("text", x = 0.0, y = 1, label = "Concordo totalmente", 
+             color = lik_colors[7], hjust = 1, vjust = 0) +
     theme_minimal() +
-    labs(title = "Respostas ",
+    labs(title = "Sumário de todas as respostas:",
          x = NULL,
          y = NULL,
          fill = NULL) +
@@ -64,13 +67,13 @@ plot_all_likert_data <- function(survey_data) {
     )
 }
 
+
 plot_likert_by <- function(survey_data, group_category = NULL) {
   
   if(is.null(group_category)) {
     error(-1)
   }
-  
-  group_category <- cat_vision
+
   survey_data  |>
     select(matches("^Q[01][[:digit:]][[:blank:]]")) |> 
     pivot_longer(cols = everything(),
@@ -78,6 +81,7 @@ plot_likert_by <- function(survey_data, group_category = NULL) {
                  values_to = "answer") |> 
     mutate(question_index = str_extract(question, "^Q[01][[:digit:]]")) |>
     filter(question_index %in% group_category) |> 
+    filter(!is.na(answer)) |> 
     group_by(question) |>
     count(answer) |>
     mutate(p = n / sum(n)) |> 
@@ -89,16 +93,18 @@ plot_likert_by <- function(survey_data, group_category = NULL) {
       fill = forcats::fct_rev(answer)
     )) +
     geom_col(position = "stack", width = 0.5) +
-    geom_text(size = 3, position = position_stack(vjust = 0.5)) +
+    geom_text(size = 3, position = position_stack(vjust = 0.5), color = "white") +
     theme_minimal() +
-    labs(title = "Respostas ",
+    labs(title = "",
          x = NULL,
          y = NULL,
          fill = NULL) +
     scale_fill_manual(values = lik_colors) +
-    scale_x_discrete(labels = label_wrap_gen(45)) +
-    annotate("text", x = 0.5, y = 0, label = "Discordo totalmente", color = lik_colors[1], hjust = 0, vjust = 0) +
-    annotate("text", x = 0.5, y = 1, label = "Concordo totalmente", color = lik_colors[7], hjust = 1, vjust = 0) +
+    scale_x_discrete(labels = label_wrap_gen(25)) +
+    annotate("text", x = 0.5, y = 0, label = "Discordo totalmente", 
+             color = lik_colors[1], hjust = 0, vjust = 0) +
+    annotate("text", x = 0.5, y = 1, label = "Concordo totalmente", 
+             color = lik_colors[7], hjust = 1, vjust = 0) +
     coord_flip() +
     theme(
       axis.text.x = element_blank(),
@@ -107,3 +113,162 @@ plot_likert_by <- function(survey_data, group_category = NULL) {
       legend.position = "none"
     )
 }
+
+
+
+facet_linha_likert_by <- function(survey_data, group_category = NULL) {
+  
+  if(is.null(group_category)) {
+    error(-1)
+  }
+  
+  df <- 
+    survey_data  |>
+    select(matches("^(Q|O)")) |> 
+    pivot_longer(cols = matches("^Q[01][[:digit:]][[:blank:]]"),
+                 names_to = "question",
+                 values_to = "answer") |>  
+    mutate(question_index = str_extract(question, "^Q[01][[:digit:]]")) 
+  
+  new_names <- names(df)
+  names(df) <- c(c("linha", "turno", "contrato"), new_names[4:6])
+  
+  df |> 
+    filter(question_index %in% group_category) |> 
+    group_by(question, linha) |>
+    count(answer) |>
+    mutate(p = n / sum(n)) |> 
+    ggplot(aes(
+      fct_rev(question),
+      p,
+      group = question,
+      label = paste0(as.character(round(100 * p, 1)), "%"),
+      fill = forcats::fct_rev(answer)
+    )) +
+    geom_col(position = "stack", width = 0.5) +
+    geom_text(size = 3, position = position_stack(vjust = 0.5), color = "white") +
+    theme_minimal() +
+    labs(title = NULL,
+         x = NULL,
+         y = NULL,
+         fill = NULL) +
+    scale_fill_manual(values = lik_colors) +
+    scale_x_discrete(labels = label_wrap_gen(45)) +
+    annotate("text", x = 0, y = 0, label = "Discordo totalmente", 
+             color = lik_colors[1], hjust = 0, vjust = 0) +
+    annotate("text", x = 0, y = 1, label = "Concordo totalmente", 
+             color = lik_colors[7], hjust = 1, vjust = 0) +
+    facet_wrap(~ factor(linha, levels = c("M&M", "SNICKERS", "TWIX", "Manutenção", "Outra")), ncol = 1) +
+    coord_flip() +
+    theme(
+      axis.text.x = element_blank(),
+      axis.title.x = element_blank(),
+      panel.grid = element_blank(),
+      legend.position = "none"
+    )
+}
+
+facet_turno_likert_by <- function(survey_data, group_category = NULL) {
+  
+  if(is.null(group_category)) {
+    error(-1)
+  }
+  
+  df <- 
+    survey_data  |>
+    select(matches("^(Q|O)")) |> 
+    pivot_longer(cols = matches("^Q[01][[:digit:]][[:blank:]]"),
+                 names_to = "question",
+                 values_to = "answer") |>  
+    mutate(question_index = str_extract(question, "^Q[01][[:digit:]]")) 
+  
+  new_names <- names(df)
+  names(df) <- c(c("linha", "turno", "contrato"), new_names[4:6])
+  
+  df |> 
+    filter(question_index %in% group_category) |> 
+    group_by(question, turno) |>
+    count(answer) |>
+    mutate(p = n / sum(n)) |> 
+    ggplot(aes(
+      fct_rev(question),
+      p,
+      group = question,
+      label = paste0(as.character(round(100 * p, 1)), "%"),
+      fill = forcats::fct_rev(answer)
+    )) +
+    geom_col(position = "stack", width = 0.5) +
+    geom_text(size = 3, position = position_stack(vjust = 0.5), color = "white") +
+    theme_minimal() +
+    labs(title = NULL,
+         x = NULL,
+         y = NULL,
+         fill = NULL) +
+    scale_fill_manual(values = lik_colors) +
+    scale_x_discrete(labels = label_wrap_gen(45)) +
+    annotate("text", x = 0, y = 0, label = "Discordo totalmente", 
+             color = lik_colors[1], hjust = 0, vjust = 0) +
+    annotate("text", x = 0, y = 1, label = "Concordo totalmente", 
+             color = lik_colors[7], hjust = 1, vjust = 0) +
+    facet_wrap(~ turno, ncol = 1) +
+    coord_flip() +
+    theme(
+      axis.text.x = element_blank(),
+      axis.title.x = element_blank(),
+      panel.grid = element_blank(),
+      legend.position = "none"
+    )
+}
+
+facet_contrato_likert_by <- function(survey_data, group_category = NULL) {
+  
+  if(is.null(group_category)) {
+    error(-1)
+  }
+  
+  df <- 
+    survey_data  |>
+    select(matches("^(Q|O)")) |> 
+    pivot_longer(cols = matches("^Q[01][[:digit:]][[:blank:]]"),
+                 names_to = "question",
+                 values_to = "answer") |>  
+    mutate(question_index = str_extract(question, "^Q[01][[:digit:]]")) 
+  
+  new_names <- names(df)
+  names(df) <- c(c("linha", "turno", "contrato"), new_names[4:6])
+  
+  df |> 
+    filter(question_index %in% group_category) |> 
+    group_by(question, contrato) |>
+    count(answer) |>
+    mutate(p = n / sum(n)) |> 
+    ggplot(aes(
+      fct_rev(question),
+      p,
+      group = question,
+      label = paste0(as.character(round(100 * p, 1)), "%"),
+      fill = forcats::fct_rev(answer)
+    )) +
+    geom_col(position = "stack", width = 0.5) +
+    geom_text(size = 2, position = position_stack(vjust = 0.5), color = "white") +
+    theme_minimal() +
+    labs(title = NULL,
+         x = NULL,
+         y = NULL,
+         fill = NULL) +
+    scale_fill_manual(values = lik_colors) +
+    scale_x_discrete(labels = label_wrap_gen(45)) +
+    annotate("text", x = 0, y = 0, label = "Discordo totalmente", 
+             color = lik_colors[1], hjust = 0, vjust = 0) +
+    annotate("text", x = 0, y = 1, label = "Concordo totalmente", 
+             color = lik_colors[7], hjust = 1, vjust = 0) +
+    facet_wrap(~ contrato, ncol = 1) +
+    coord_flip() +
+    theme(
+      axis.text.x = element_text(size = 2),
+      axis.title.x = element_blank(),
+      panel.grid = element_blank(),
+      legend.position = "none"
+    )
+}
+

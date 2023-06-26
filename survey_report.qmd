@@ -1,18 +1,18 @@
 ---
-title: "Survey Report"
-author: "Marcos Abreu"
+title: "Análise de Pesquisa - Projeto Java"
+author: "Dynamica Consultoria"
 format: html
 # revealjs
 editor: visual
 ---
 
-## Evaluation of Survey Results
+Durante as semanas de P6W4 (11/06/2023) até P7W2 (30/06/2023) foi realizada uma pesquisa junto aos associados e temporários que atuam nas áreas de manutenção e operação da fábrica de Guararema para identificar os níveis de consciencia (Awareness) e pré-disposição (Desire) em relação às mudanças do projeto Java.
 
-During the P6W4 and P7W1 weeks it was conducted a survey with the Value Stream associates and temporary workers and the maintenance team.
+Apresentamos aqui os resultados obtidos.
 
-This presentation brings the analysis of the survey results.
+## Respostas obtidas
 
-## Responses
+Em relação ao número de respostas obtidas temos os seguintes números:
 
 ```{r}
 #| echo: false
@@ -23,12 +23,13 @@ library(tidyverse)
 library(readxl)
 library(janitor)
 library(patchwork)
+library(gt)
 
 source("R/survey_read_data.R")
 source("R/survey_plot.R")
 
 folder = "/Users/marcos.abreu/workspace/survey-mars/data"
-survey_data <- readSurveyMonkeyData(folder, "Java - Feedback.xlsx")
+survey_data <- read_survey_monkey_data(folder, "Java - Feedback.xlsx")
 
 extra_columns <- 
   survey_data |> 
@@ -40,24 +41,62 @@ names(extra_columns) <- c('linha', 'turno', 'contrato')
 
 dist_df <- get_respondent_data(survey_data, extra_columns)
 
-plot_linha <- 
-  dist_df |> plot_survey_by(linha)
-plot_turno <- 
-  dist_df |> plot_survey_by(turno)
-plot_contrato <- 
-  dist_df |> plot_survey_by(contrato)
-
-plot <- ((plot_linha+ggtitle("")) + (plot_turno+ggtitle(""))) / (plot_contrato+ggtitle("")+coord_flip()) 
-plot + plot_annotation(
-  title = 'Number of answers',
-  subtitle = 'Status 2023-06-22',
-  caption = 'Disclaimer: partial data'
-)
 ```
 
-## Survey Summary
+::: columns
+::: {.column width="33%"}
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+dist_df |> 
+  count(linha, sort = TRUE) |> 
+  gt::gt() |> 
+  tab_header(title = "Por Linha") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  grand_summary_rows(columns = c('n'),
+                     fns = list(total ~ sum(.))) |> 
+  as_raw_html()
+```
+:::
 
-Summary of collected answers:
+::: {.column width="33%"}
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+dist_df |> 
+  count(turno, sort = TRUE) |> 
+  gt::gt() |> 
+  tab_header(title = "Por Turno") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  grand_summary_rows(columns = c('n'),
+                     fns = list(total ~ sum(.))) |> 
+  as_raw_html()
+```
+:::
+
+::: {.column width="34%"}
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+dist_df |> 
+  count(contrato, sort = TRUE) |> 
+  gt::gt() |> 
+  tab_header(title = "Por Tipo de Contrato") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  grand_summary_rows(columns = c('n'),
+                     fns = list(total ~ sum(.))) |> 
+  as_raw_html()
+```
+:::
+:::
+
+## Sumário
 
 ```{r}
 #| echo: false
@@ -66,74 +105,89 @@ Summary of collected answers:
 
 plot_all_likert_data(survey_data)
 
-
-
-```
-
-## Measured Dimensions
-
-::: columns
-::: {.column width="50%"}
--   Awareness
-
-    -   Vision
-
-    -   Perception of the Change
-
-    -   Communication
-:::
-
-::: {.column width="50%"}
--   Desire
-
-    -   Leadership
-
-    -   Engagement
-
-    -   Intention
-
-        -   Attitudes
-
-        -   Perceived Norms
-
-        -   Self-Capacity
-:::
-:::
-
-The following slides show results by different dimensions
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-
-# Groups of questions:
 cat_vision <- c("Q01", "Q02")
 cat_change_management <- c("Q03", "Q04")
-
 cat_communication <- c("Q05", "Q06")
-
 cat_attitude <- c("Q07", "Q08")
-
 cat_leadership <- c("Q09", "Q10")
 cat_engagement <- c("Q11", "Q12")
-
 cat_perceived_norms <- c("Q13", "Q14")
 cat_self_efficacy <- c("Q15")
 
 ```
 
-## Vision
+## Questões
+
+1.  Os resultados podem ser avaliados no conjunto de todos os respondentes, ou devem ser analisados por grupos?
+
+2.  Qual a divisão por grupo que deve ser considerada?
+
+O objetivo aqui é evitar o Paradoxo de Simpson durante a análise dos resultados.
+
+## Dimensões avaliadas na pesquisa
+
+::: columns
+::: {.column width="50%"}
+-   Consciência (*Awareness*)
+
+    -   Visão (*Vision*)
+
+    -   Percepção da Mudança (*Perception of the Change*)
+
+    -   Comunicação (*Communication*)
+:::
+
+::: {.column width="50%"}
+-   Pré-disposição (\_Desire\_)
+
+    -   Liderança (*Leadership*)
+
+    -   Engajamento (*Engagement*)
+
+    -   Intenção (*Intention*)
+
+        -   Atitude (*Attitude*)
+
+        -   Normas Percebidas (*Perceived Norms*)
+
+        -   Auto-eficácia (*Self-Efficacy*)
+:::
+:::
+
+## Grupos Considerados
+
+-   Linha
+
+-   Turno
+
+-   Tipo de Contrato
+
+-   Impacto da mudança sobre o grupo
+
+## Desenvolvimento
+
+Para desenvolver a análise vamos apresentar os resultados conforme:
+
+1.  Para o universo total de respondentes
+2.  Por Linha
+3.  Por Turno
+4.  Por Tipo de Contrato
+5.  Por percepção do impacto da mudança sobre o grupo
+6.  Por análise de afinidade (identificar quais escolhas foram feitas juntas)
+
+# Análise do universo total de respondentes
+
+## Visão
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
 #| 
-plot_likert_by(survey_data, cat_vision)
+plot_likert_by(survey_data, cat_vision) 
 ```
 
-## Perception of Change Management
+## Percepção da Mudança
 
 ```{r}
 #| echo: false
@@ -143,7 +197,7 @@ plot_likert_by(survey_data, cat_vision)
 plot_likert_by(survey_data, cat_change_management)
 ```
 
-## Communication
+## Comunicação
 
 ```{r}
 #| echo: false
@@ -153,7 +207,7 @@ plot_likert_by(survey_data, cat_change_management)
 plot_likert_by(survey_data, cat_communication)
 ```
 
-## Leadership
+## Liderança
 
 ```{r}
 #| echo: false
@@ -163,7 +217,7 @@ plot_likert_by(survey_data, cat_communication)
 plot_likert_by(survey_data, cat_leadership)
 ```
 
-## Engagement
+## Engajamento
 
 ```{r}
 #| echo: false
@@ -173,7 +227,19 @@ plot_likert_by(survey_data, cat_leadership)
 plot_likert_by(survey_data, cat_engagement)
 ```
 
-## Behavior
+## Intenção do Comportamento
+
+Estamos considerando aqui o modelo de intensão do comportamento conforme descrito pelo modelo:
+
+```{mermaid}
+flowchart LR 
+A[Atitudes] --> I[Intenção] 
+N[Normas Percebidas] --> I 
+S[Auto-eficácia] --> I 
+E[Fatores Ambientais] --> C[Comportamento] 
+I --> C 
+H[Habilidades] --> C
+```
 
 ```{r}
 #| echo: false
@@ -183,4 +249,203 @@ plot_likert_by(survey_data, cat_engagement)
 plot_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
 ```
 
-Vamos avaliar por grupo de linha, turno, contrato.
+As questões Q07 e Q08 buscam medir a **Atitude** em relação à mudança.
+As questões Q13 e Q14 buscam medir a **Norma Percebida** em relação à mudança.
+E, a questão Q15 buca medir a **Auto-Eficácia** em relação à mudança.
+
+A comparação dos resultados mostra que os respondentes são muito mais decididos - tanto positivamente, quanto negativamente - nas suas **Atitudes** do que em relação à **Norma Percebida**.
+Isto significa que os respondentes se importam mais com a própria percepção do que a do grupo.
+
+Em relação à **Auto-Eficácia** as respostas mostram que há baixa influência da mesma como determinante do comportamento.
+Isto significa que os respondentes não vêem sua capacidade de adaptação e aprendizagem como restrição para a mudança.
+
+# Análise comparativa para diferentes linhas
+
+## Visão
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_linha_likert_by(survey_data, cat_vision) 
+```
+
+## Percepção da Mudança
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_linha_likert_by(survey_data, cat_change_management)
+```
+
+## Comunicação
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_linha_likert_by(survey_data, cat_communication)
+```
+
+# Análise comparativa para diferentes Turnos
+
+## Visão
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_turno_likert_by(survey_data, cat_vision) 
+```
+
+## Percepção da Mudança
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_turno_likert_by(survey_data, cat_change_management)
+```
+
+## Comunicação
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_turno_likert_by(survey_data, cat_communication)
+```
+
+## Liderança
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_turno_likert_by(survey_data, cat_leadership)
+```
+
+## Engajamento
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_turno_likert_by(survey_data, cat_engagement)
+```
+
+## Intenção do Comportamento
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-height: 10
+
+facet_turno_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
+```
+
+# Análise comparativa para diferentes tipos de contrato
+
+## Visão
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_contrato_likert_by(survey_data, cat_vision) 
+```
+
+## Percepção da Mudança
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_contrato_likert_by(survey_data, cat_change_management)
+```
+
+## Comunicação
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_contrato_likert_by(survey_data, cat_communication)
+```
+
+## Liderança
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_contrato_likert_by(survey_data, cat_leadership)
+```
+
+## Engajamento
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_contrato_likert_by(survey_data, cat_engagement)
+```
+
+## Intenção do Comportamento
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-height: 10
+
+facet_contrato_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
+```
+
+
+
+## Liderança
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_contrato_likert_by(survey_data, cat_leadership)
+```
+
+## Engajamento
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_contrato_likert_by(survey_data, cat_engagement)
+```
+
+## Intenção do Comportamento
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-height: 10
+
+facet_contrato_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
+```
