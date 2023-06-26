@@ -49,26 +49,7 @@ readSurveyMonkeyData <- function(folder, file_name) {
                                                      ordered = TRUE)))
 }
 
-# --------------
 
-# getQuestions <- function(survey_data){
-#   questions <- 
-#     survey_data |> 
-#     select(last_col(16):last_col(2)) |> 
-#     names()
-#   tmp <- tibble(
-#     question = questions
-#   )
-#   tmp <- 
-#     tmp |> 
-#     mutate(question = str_extract(question, "^.+?(?=[:punct:])")) |> 
-#     rowid_to_column() |> 
-#     mutate(question = paste0(question, ".")) |> 
-#     pivot_wider(names_from = rowid,
-#                 values_from = question,
-#                 names_prefix = "q")  
-#     tmp
-# }
 
 # Get Quantitative Answers 
 getQtAnswers <- function(survey_data) {

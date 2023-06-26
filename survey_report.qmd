@@ -64,7 +64,7 @@ Summary of collected answers:
 #| warning: false
 #| message: false
 
-qt_answers <- getQtAnswers(survey_data)
+plot_all_likert_data(survey_data)
 
 
 
@@ -107,6 +107,80 @@ The following slides show results by different dimensions
 #| warning: false
 #| message: false
 
-plot_survey_by("vision")
+# Groups of questions:
+cat_vision <- c("Q01", "Q02")
+cat_change_management <- c("Q03", "Q04")
+
+cat_communication <- c("Q05", "Q06")
+
+cat_attitude <- c("Q07", "Q08")
+
+cat_leadership <- c("Q09", "Q10")
+cat_engagement <- c("Q11", "Q12")
+
+cat_perceived_norms <- c("Q13", "Q14")
+cat_self_efficacy <- c("Q15")
 
 ```
+
+## Vision
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+plot_likert_by(survey_data, cat_vision)
+```
+
+## Perception of Change Management
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+plot_likert_by(survey_data, cat_change_management)
+```
+
+## Communication
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+plot_likert_by(survey_data, cat_communication)
+```
+
+## Leadership
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+plot_likert_by(survey_data, cat_leadership)
+```
+
+## Engagement
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+plot_likert_by(survey_data, cat_engagement)
+```
+
+## Behavior
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+plot_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
+```
+
+e...
