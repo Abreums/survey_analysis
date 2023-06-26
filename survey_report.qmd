@@ -6,23 +6,107 @@ format: html
 editor: visual
 ---
 
-## Quarto
+## Evaluation of Survey Results
 
-Quarto enables you to weave together content and executable code into a finished presentation.
-To learn more about Quarto presentations see <https://quarto.org/docs/presentations/>.
+During the P6W4 and P7W1 weeks it was conducted a survey with the Value Stream associates and temporary workers and the maintenance team.
 
-## Bullets
+This presentation brings the analysis of the survey results.
 
-When you click the **Render** button a document will be generated that includes:
-
--   Content authored with markdown
--   Output from executable code
-
-## Code
-
-When you click the **Render** button a presentation will be generated that includes both content and the output of embedded code.
-You can embed code like this:
+## Responses
 
 ```{r}
-1 + 1
+#| echo: false
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(patchwork)
+
+source("R/survey_read_data.R")
+source("R/survey_plot.R")
+
+folder = "/Users/marcos.abreu/workspace/survey-mars/data"
+survey_data <- readSurveyMonkeyData(folder, "Java - Feedback.xlsx")
+
+extra_columns <- 
+  survey_data |> 
+  select(`Onde você atua?`,
+         `Qual seu turno?`,
+         `Qual seu tipo de contrato?`) |> 
+  names()
+names(extra_columns) <- c('linha', 'turno', 'contrato')
+
+dist_df <- get_respondent_data(survey_data, extra_columns)
+
+plot_linha <- 
+  dist_df |> plot_survey_by(linha)
+plot_turno <- 
+  dist_df |> plot_survey_by(turno)
+plot_contrato <- 
+  dist_df |> plot_survey_by(contrato)
+
+plot <- ((plot_linha+ggtitle("")) + (plot_turno+ggtitle(""))) / (plot_contrato+ggtitle("")+coord_flip()) 
+plot + plot_annotation(
+  title = 'Number of answers',
+  subtitle = 'Status 2023-06-22',
+  caption = 'Disclaimer: partial data'
+)
+```
+
+## Survey Summary
+
+Summary of collected answers:
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+qt_answers <- getQtAnswers(survey_data)
+
+
+
+```
+
+## Measured Dimensions
+
+::: columns
+::: {.column width="50%"}
+-   Awareness
+
+    -   Vision
+
+    -   Perception of the Change
+
+    -   Communication
+:::
+
+::: {.column width="50%"}
+-   Desire
+
+    -   Leadership
+
+    -   Engagement
+
+    -   Intention
+
+        -   Attitudes
+
+        -   Perceived Norms
+
+        -   Self-Capacity
+:::
+:::
+
+The following slides show results by different dimensions
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+plot_survey_by("vision")
+
 ```

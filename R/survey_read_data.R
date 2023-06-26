@@ -89,12 +89,20 @@ getQlAnswers <- function(survey_data) {
     select(10, 11, 12, last_col(1):last_col())
 }
 
-# Get execution data
-getDistributionData <- function(survey_data) {
-  df <- 
-    survey_data |> 
-    select(1:4, 10:12)
-  names(df) <- c(names(df[1:4]), c("linha", "turno", "contrato"))
+# Get respondent data
+get_respondent_data <- function(survey_data, extra_columns) {
+  if(missing(extra_columns)) {
+    df <- 
+      survey_data |> 
+      select(1:8)
+    names(df) <- c(names(df[1:8]))
+  } else {
+    df <- 
+      survey_data |> 
+      select(1:8, extra_columns)
+    names(df) <- c(names(df[1:8]), names(extra_columns))  
+  }
+  
   df
 }
 
