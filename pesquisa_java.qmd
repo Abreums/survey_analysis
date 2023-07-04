@@ -1,0 +1,377 @@
+---
+title: "Projeto Java - Primeira Pesquisa"
+format: 
+  pptx:
+    reference-doc: mars_ppt.pptx
+# revealjs
+editor: visual
+---
+
+Este relatório contém a análise dos dados de **Consciência** e **Pré-disposição** 
+dos associados e temporários da fábrica da MARS Guararema em relação so projeto
+Java.
+
+Os dados foram coletados durante as semanas de P6W4 (11/06/2023) até P7W2 (30/06/2023).
+
+O método de coleta foi o de contribuição espontânia com divulgação através de 
+mensagens e cartazes na fábrica.
+
+## Dimensões avaliadas na pesquisa
+::: {small}
+A medição da Consciência e Pré-disposição faz parte do modelo ADKAR de Gestão 
+de mundaça adotado globalmente pela MARS. 
+
+Nesta pesquisa detalhamos os elementos de Consciência (Awareness) e Pré-disposição
+(Desire) em sub-elementos com o intuito de prover maior direcionamento para as ações 
+de Gestão de Mudança:
+
+::: columns
+::: {.column width="50%"}
+-   Consciência (*Awareness*)
+
+    -   Visão (*Vision*)
+
+    -   Condução da Mudança (*Perception of the Change*)
+
+    -   Comunicação (*Communication*)
+:::
+
+::: {.column width="50%"}
+-   Pré-disposição (*Desire*)
+
+    -   Liderança (*Leadership*)
+
+    -   Participação (Participation)
+
+    -   Intenção (*Intention*)
+
+        -   Atitude (*Attitude*)
+
+        -   Normas Percebidas (*Perceived Norms*)
+
+        -   Auto-eficácia (*Self-Efficacy*)
+:::
+:::
+
+Detalhes serão providos no corpo do relatório.
+:::
+
+## Respostas obtidas
+
+Em relação ao número de respostas obtidas temos os seguintes números:
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(patchwork)
+library(gt)
+library(DescTools)
+
+source("R/survey_read_data.R")
+source("R/survey_plot.R")
+
+folder = "/Users/marcos.abreu/workspace/survey-mars/data"
+survey_data <- read_survey_monkey_data(folder, "Java - Feedback.xlsx")
+
+
+
+# nested_questions <-
+#   survey_data |>
+#   pivot_longer(cols = c(last_col(16):last_col(2)),
+#                names_to = "question",
+#                values_to = "answer") |>
+#   mutate(question_id = str_extract(question, "^.{3}")) |>
+#   select(linha, turno, contrato, question_id, answer) |>
+#   nest(data = c(-question_id))
+# 
+# teste <-
+#   nested_questions$data[[3]]
+# 
+# defaultW <- getOption("warn")
+# options(warn = -1)
+# teste |>
+#   select(linha, answer) |>
+#   filter(!is.na(linha),
+#          linha %in% c("M&M", "SNICKERS", "TWIX")) |>
+#   mutate(linha = fct_drop(linha)) |>
+#   mutate(answer = if_else(answer >= 5, 7, 1)) |>
+#   table() |>
+#   chisq.test() |>
+#   broom::tidy()
+# 
+# 
+# teste |>
+#   select(turno, answer) |>
+#   filter(!is.na(turno),
+#          turno %in% c("A", "B", "C", "F")) |>
+#   mutate(turno = fct_drop(turno)) |>
+#   mutate(answer = if_else(answer >= 5, 7, 1)) |>
+#   table() |>
+#   chisq.test() |>
+#   broom::tidy()
+# options(warn = defaultW)
+
+
+
+```
+
+## Quantidade de Respostas por Linha
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+survey_data |> 
+  count(linha, sort = TRUE) |> 
+  gt::gt() |> 
+  tab_header(title = "Por Linha") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  grand_summary_rows(columns = c('n'),
+                     fns = list(total ~ sum(.))) |> 
+  as_raw_html()
+```
+
+## Quantidade de Respostas por Turno
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+survey_data |> 
+  count(turno, sort = TRUE) |> 
+  gt::gt() |> 
+  tab_header(title = "Por Turno") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  grand_summary_rows(columns = c('n'),
+                     fns = list(total ~ sum(.))) |> 
+  as_raw_html()
+```
+
+## Quantidade de Respostas por Tipo de Contrato
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+survey_data |> 
+  count(contrato, sort = TRUE) |> 
+  gt::gt() |> 
+  tab_header(title = "Por Tipo de Contrato") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  grand_summary_rows(columns = c('n'),
+                     fns = list(total ~ sum(.))) |> 
+  as_raw_html()
+```
+
+## Resumo das Respostas
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+plot_all_likert_data(survey_data)
+
+plot_likert_by(survey_data, group_category = "turno")
+
+```
+
+
+# Resultados por dimensão
+
+## Visão
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+plot_likert_by(survey_data, c("Q01", "Q02")) 
+
+# answers <- get_survey_answers(survey_data)
+# answers |> 
+#   filter(!is.na(linha),
+#          linha %in% c("M&M", "SNICKERS", "TWIX")) |> 
+#   mutate(linha = fct_drop(linha)) |> 
+#   select(Q01) |> 
+#   table() 
+
+plot_bar_CI(survey_data, "Q01")
+plot_bar_CI(survey_data, "Q02")
+
+
+```
+
+## Condução da Mudança
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+plot_likert_by(survey_data, c("Q03", "Q04"))
+
+plot_bar_CI(survey_data, "Q03")
+plot_bar_CI(survey_data, "Q04")
+```
+
+## Comunicação
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+
+plot_likert_by(survey_data |> 
+  filter(!is.na(`Q06 Eu me sinto informado em relação ao Projeto Java.`)), c("Q05", "Q06"))
+
+
+plot_bar_CI(survey_data, "Q05")
+plot_bar_CI(survey_data |> 
+  filter(!is.na(`Q06 Eu me sinto informado em relação ao Projeto Java.`)), "Q06")
+```
+
+## Liderança
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+plot_likert_by(survey_data, c("Q09", "Q10"))
+
+
+plot_bar_CI(survey_data, "Q09")
+plot_bar_CI(survey_data, "Q10")
+```
+
+## Participação
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+plot_likert_by(survey_data, c("Q11", "Q12"))
+
+
+plot_bar_CI(survey_data, "Q11")
+plot_bar_CI(survey_data, "Q12")
+```
+
+## Intenção do Comportamento
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+plot_likert_by(survey_data, c("Q07", "Q08", "Q13", "Q14", "Q15"))
+
+
+plot_bar_CI(survey_data, "Q07")
+plot_bar_CI(survey_data, "Q08")
+
+plot_bar_CI(survey_data, "Q13")
+plot_bar_CI(survey_data, "Q14")
+
+plot_bar_CI(survey_data, "Q15")
+```
+
+As questões Q07 e Q08 buscam medir a **Atitude** em relação à mudança.
+As questões Q13 e Q14 buscam medir a **Norma Percebida** em relação à mudança.
+E, a questão Q15 buca medir a **Auto-Eficácia** em relação à mudança.
+
+A comparação dos resultados mostra que os respondentes tomam posições - tanto positivamente, quanto negativamente - baseando-se mais nas **Atitudes** do que em relação à **Norma Percebida**, ou a **Auto-Eficácia**.
+
+## Comentários e Questionamentos recebidos
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+survey_data |> 
+  select(linha, turno, contrato, contrib1, contrib2) |> 
+  filter(!is.na(contrib1) | !is.na(contrib2)) |> 
+  count(linha) |> 
+  gt() |> 
+  tab_header(title = "Por Linha") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  as_raw_html()
+
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+survey_data |> 
+  select(linha, turno, contrato, contrib1, contrib2) |> 
+  filter(!is.na(contrib1) | !is.na(contrib2)) |> 
+  count(turno) |> 
+  gt() |> 
+  tab_header(title = "Por Turno") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  as_raw_html()
+```
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+survey_data |> 
+  select(linha, turno, contrato, contrib1, contrib2) |> 
+  filter(!is.na(contrib1) | !is.na(contrib2)) |> 
+  count(contrato) |> 
+  gt() |> 
+  tab_header(title = "Por Contrato") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  as_raw_html()
+```
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+survey_data |> 
+  select(linha, turno, contrato, contrib1, contrib2) |> 
+  filter(!is.na(contrib1) | !is.na(contrib2)) |> 
+  pivot_longer(cols = c(contrib1, contrib2),
+               names_to = "contrib",
+               values_to = "comentario") |> 
+  filter(!is.na(comentario)) |> 
+  select(comentario) |> 
+  filter(!comentario %in% c("Não", "Tranquilo", "N.A", "Sim gostaria")) |> 
+  gt() |> 
+  tab_header(title = "Comentários") |> 
+  opt_align_table_header(align = "left") |>  
+  tab_options(column_labels.hidden = TRUE) |> 
+  as_raw_html()
+
+```

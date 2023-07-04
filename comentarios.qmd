@@ -1,0 +1,48 @@
+---
+title: "Contributions"
+format: html
+editor: visual
+---
+
+Perguntas e comentários enviados.
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(patchwork)
+library(gt)
+library(DescTools)
+
+source("R/survey_read_data.R")
+source("R/survey_plot.R")
+
+folder = "/Users/marcos.abreu/workspace/survey-mars/data"
+survey_data <- read_survey_monkey_data(folder, "Java - Feedback.xlsx")
+
+
+survey_data |> 
+  select(linha, turno, contrato, contrib1, contrib2) |> 
+  filter(!is.na(contrib1) | !is.na(contrib2)) |> 
+  count(linha)
+survey_data |> 
+  select(linha, turno, contrato, contrib1, contrib2) |> 
+  filter(!is.na(contrib1) | !is.na(contrib2)) |> 
+  count(turno)
+survey_data |> 
+  select(linha, turno, contrato, contrib1, contrib2) |> 
+  filter(!is.na(contrib1) | !is.na(contrib2)) |> 
+  count(contrato)
+
+survey_data |> 
+  select(linha, turno, contrato, contrib1, contrib2) |> 
+  filter(!is.na(contrib1) | !is.na(contrib2)) |> 
+  pivot_longer(cols = c(contrib1, contrib2),
+               names_to = "contrib",
+               values_to = "comentario") |> 
+  filter(!is.na(comentario)) |> 
+  select(comentario) |> 
+  filter(!comentario %in% c("Não", "Tranquilo", "N.A", "Sim gostaria")) 
+
+
+```

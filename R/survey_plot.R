@@ -288,6 +288,7 @@ get_survey_answers_by_question <- function(survey_data, question) {
 }
 
 plot_bar_CI <- function(survey_data, question) {
+  #question <- "Q09"
   the_title <-
     survey_data |>
     select(starts_with(question)) |>
@@ -304,7 +305,7 @@ plot_bar_CI <- function(survey_data, question) {
   q4
   
   tq4 <-
-    as_tibble(MultinomCI(q4)) |>
+    as_tibble(MultinomCI(q4, conf.level = 0.95, method = "wilson")) |>
     mutate(answer = as.character(row_number()))
   
   tq4 |>
@@ -339,7 +340,7 @@ plot_bar_CI <- function(survey_data, question) {
     ),
     color = lik_colors[1]) +
     geom_text(aes(
-      x = 7,
+      x = dim(tq4)[1],
       y = 0,
       label = "Concordo totalmente ",
       vjust = 1,
@@ -350,3 +351,4 @@ plot_bar_CI <- function(survey_data, question) {
   
   
 }
+
