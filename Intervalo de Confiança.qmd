@@ -1,0 +1,15 @@
+---
+title: "Intervalo de Confiança"
+format: html
+editor: visual
+---
+
+O Intervalo de Confiança será calculado para cada uma das questões individualmente.
+Vamos utilizar o nível de confiança de 95% (ou seja, um t-score de 1,96).
+
+```{r}
+
+
+```
+
+\

@@ -29,17 +29,9 @@ source("R/survey_read_data.R")
 source("R/survey_plot.R")
 
 folder = "/Users/marcos.abreu/workspace/survey-mars/data"
-survey_data <- read_survey_monkey_data(folder, "Java - Feedback.xlsx")
-
-extra_columns <- 
-  survey_data |> 
-  select(`Onde você atua?`,
-         `Qual seu turno?`,
-         `Qual seu tipo de contrato?`) |> 
-  names()
-names(extra_columns) <- c('linha', 'turno', 'contrato')
-
-dist_df <- get_respondent_data(survey_data, extra_columns)
+file_name = "Java - Feedback.xlsx"
+survey_data <- read_survey_monkey_data(folder, 
+                                       file_name)
 
 ```
 
@@ -49,7 +41,8 @@ dist_df <- get_respondent_data(survey_data, extra_columns)
 #| echo: false
 #| warning: false
 #| message: false
-dist_df |> 
+survey_data |> 
+  select(respondent_id, linha) |> 
   count(linha, sort = TRUE) |> 
   gt::gt() |> 
   tab_header(title = "Por Linha") |> 
@@ -66,7 +59,7 @@ dist_df |>
 #| echo: false
 #| warning: false
 #| message: false
-dist_df |> 
+survey_data |> 
   count(turno, sort = TRUE) |> 
   gt::gt() |> 
   tab_header(title = "Por Turno") |> 
@@ -83,7 +76,7 @@ dist_df |>
 #| echo: false
 #| warning: false
 #| message: false
-dist_df |> 
+survey_data |> 
   count(contrato, sort = TRUE) |> 
   gt::gt() |> 
   tab_header(title = "Por Tipo de Contrato") |> 
@@ -105,14 +98,7 @@ dist_df |>
 
 plot_all_likert_data(survey_data)
 
-cat_vision <- c("Q01", "Q02")
-cat_change_management <- c("Q03", "Q04")
-cat_communication <- c("Q05", "Q06")
-cat_attitude <- c("Q07", "Q08")
-cat_leadership <- c("Q09", "Q10")
-cat_engagement <- c("Q11", "Q12")
-cat_perceived_norms <- c("Q13", "Q14")
-cat_self_efficacy <- c("Q15")
+
 
 ```
 
@@ -154,27 +140,6 @@ O objetivo aqui é evitar o Paradoxo de Simpson durante a análise dos resultado
 :::
 :::
 
-## Grupos Considerados
-
--   Linha
-
--   Turno
-
--   Tipo de Contrato
-
--   Impacto da mudança sobre o grupo
-
-## Desenvolvimento
-
-Para desenvolver a análise vamos apresentar os resultados conforme:
-
-1.  Para o universo total de respondentes
-2.  Por Linha
-3.  Por Turno
-4.  Por Tipo de Contrato
-5.  Por percepção do impacto da mudança sobre o grupo
-6.  Por análise de afinidade (identificar quais escolhas foram feitas juntas)
-
 # Análise do universo total de respondentes
 
 ## Visão
@@ -184,7 +149,18 @@ Para desenvolver a análise vamos apresentar os resultados conforme:
 #| warning: false
 #| message: false
 #| 
+
+cat_vision <- c("Q01", "Q02")
 plot_likert_by(survey_data, cat_vision) 
+
+
+# answers |> 
+#   filter(!is.na(linha),
+#          linha %in% c("M&M", "SNICKERS", "TWIX")) |> 
+#   mutate(linha = fct_drop(linha)) |> 
+#   select(linha, Q1) |> 
+#   table() |> 
+#   chisq.test()
 ```
 
 ## Percepção da Mudança
@@ -193,7 +169,9 @@ plot_likert_by(survey_data, cat_vision)
 #| echo: false
 #| warning: false
 #| message: false
-#| 
+
+
+cat_change_management <- c("Q03", "Q04")
 plot_likert_by(survey_data, cat_change_management)
 ```
 
@@ -203,7 +181,9 @@ plot_likert_by(survey_data, cat_change_management)
 #| echo: false
 #| warning: false
 #| message: false
-#| 
+
+
+cat_communication <- c("Q05", "Q06")
 plot_likert_by(survey_data, cat_communication)
 ```
 
@@ -213,7 +193,11 @@ plot_likert_by(survey_data, cat_communication)
 #| echo: false
 #| warning: false
 #| message: false
-#| 
+
+
+
+
+cat_leadership <- c("Q09", "Q10")
 plot_likert_by(survey_data, cat_leadership)
 ```
 
@@ -223,7 +207,10 @@ plot_likert_by(survey_data, cat_leadership)
 #| echo: false
 #| warning: false
 #| message: false
-#| 
+
+
+cat_engagement <- c("Q11", "Q12")
+
 plot_likert_by(survey_data, cat_engagement)
 ```
 
@@ -245,7 +232,11 @@ H[Habilidades] --> C
 #| echo: false
 #| warning: false
 #| message: false
-#| 
+
+cat_attitude <- c("Q07", "Q08")
+cat_perceived_norms <- c("Q13", "Q14")
+cat_self_efficacy <- c("Q15")
+
 plot_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
 ```
 
@@ -289,6 +280,37 @@ facet_linha_likert_by(survey_data, cat_change_management)
 #| message: false
 #| 
 facet_linha_likert_by(survey_data, cat_communication)
+```
+
+## Liderança
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_linha_likert_by(survey_data, cat_leadership)
+```
+
+## Engajamento
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+facet_linha_likert_by(survey_data, cat_engagement)
+```
+
+## Intenção do Comportamento
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-height: 10
+
+facet_linha_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
 ```
 
 # Análise comparativa para diferentes Turnos
@@ -417,8 +439,6 @@ facet_contrato_likert_by(survey_data, cat_engagement)
 facet_contrato_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
 ```
 
-
-
 ## Liderança
 
 ```{r}
@@ -448,4 +468,104 @@ facet_contrato_likert_by(survey_data, cat_engagement)
 #| fig-height: 10
 
 facet_contrato_likert_by(survey_data, c(cat_attitude, cat_perceived_norms, cat_self_efficacy))
+```
+
+# Teste de Hipótese
+
+Os resultados podem ser avaliados no conjunto de todos os respondentes, ou devem ser analisados por grupos?
+
+```{r}
+
+survey_data |> glimpse()
+survey_answers <- get_survey_answers(survey_data)
+survey_answers |> glimpse()
+answers <-
+  survey_answers |>
+  pivot_longer(cols = Q01:Q15,
+               names_to = "question",
+               values_to = "answer") |>
+  mutate(status = if_else(
+    answer >= 6,
+    "concordo",
+   # if_else(answer <= 2, "discordo", "neutro")
+   "discordo"
+  )) |>
+  select(-answer) |>
+  mutate_if(is.character, as.factor) |> 
+  pivot_wider(names_from = question,
+              values_from = status) 
+
+# Vamos testar a relevância da questão por linha
+# 1. apenas dados das linhas
+ans_linha <- 
+  answers |> 
+  filter(!is.na(linha),
+         linha %in% c("M&M", "SNICKERS", "TWIX")) |> 
+  mutate(linha = fct_drop(linha)) |> 
+  select(-c(turno, contrato)) |> 
+  pivot_longer(cols = Q01:Q15,
+               names_to = "question",
+               values_to = "answer")
+  
+ans_linha |> glimpse()
+# 2. agrupa por questão
+nested_ans_linha <- 
+  ans_linha |> 
+  group_by(question) |> 
+  nest()
+  
+nested_ans_linha <- 
+  nested_ans_linha |> 
+  mutate(chisq_test = map(data, ~ .x |>
+           select(-id) |> 
+           table() |> 
+           chisq.test() |> 
+           broom::tidy()))
+ans_linha_chisq <- 
+  nested_ans_linha |> 
+  unnest(chisq_test)
+ans_linha_chisq |> 
+  select(question, p.value) |> View()
+
+
+
+answers |> 
+  filter(!is.na(turno),
+         turno %in% c("A", "B", "C", "F")) |> 
+  mutate(turno = fct_drop(turno)) |> 
+  select(turno, Q15) |> 
+  table() |> 
+  chisq.test()
+
+# Questão Q02 e Q07 para turno C -> Há evidência de que há diferença estatística.
+
+answers |> 
+  filter(!is.na(contrato),
+         contrato %in% c("Associado por tempo indeterminado", 
+                         "Temporário", 
+                         "Associado por tempo determinado")) |> 
+  mutate(contrato = fct_drop(contrato)) |> 
+  select(contrato, Q15) |> 
+  table() |> 
+  chisq.test()
+
+
+
+  
+
+# As proporções das respostas de "concordo", "discordo" e "neutro" são iguais?
+
+# Foi feita análise por grupos considerando os grupos de diferentes linhas,
+# turnos, e tipo de contrato.
+# O único caso onde as respostas de um determinado grupo diferenciaram das
+# respostas gerais foram as respostas das questões 2 e 7 para 
+
+answers |> 
+  filter(!is.na(turno),
+         turno %in% c("A", "B", "C", "F")) |> 
+  mutate(turno = fct_drop(turno)) |> 
+  select(turno, Q02) |> 
+  table() |> 
+  chisq.test()
+
 ```

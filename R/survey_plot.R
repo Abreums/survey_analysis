@@ -52,7 +52,7 @@ plot_all_likert_data <- function(survey_data) {
     annotate("text", x = 0.0, y = 1, label = "Concordo totalmente", 
              color = lik_colors[7], hjust = 1, vjust = 0) +
     theme_minimal() +
-    labs(title = "Sumário de todas as respostas:",
+    labs(title = NULL, # "Sumário de todas as respostas:",
          x = NULL,
          y = NULL,
          fill = NULL) +
@@ -210,7 +210,7 @@ facet_turno_likert_by <- function(survey_data, group_category = NULL) {
              color = lik_colors[1], hjust = 0, vjust = 0) +
     annotate("text", x = 0, y = 1, label = "Concordo totalmente", 
              color = lik_colors[7], hjust = 1, vjust = 0) +
-    facet_wrap(~ turno, ncol = 1) +
+    facet_wrap(~ factor(turno, levels = c("A", "B", "C", "F", "Adm")), ncol = 1) +
     coord_flip() +
     theme(
       axis.text.x = element_blank(),
@@ -262,7 +262,10 @@ facet_contrato_likert_by <- function(survey_data, group_category = NULL) {
              color = lik_colors[1], hjust = 0, vjust = 0) +
     annotate("text", x = 0, y = 1, label = "Concordo totalmente", 
              color = lik_colors[7], hjust = 1, vjust = 0) +
-    facet_wrap(~ contrato, ncol = 1) +
+    facet_wrap(~ factor(contrato, levels = c("Associado por tempo indeterminado", 
+                                             "Associado por tempo determinado",
+                                             "Temporário",
+                                             "Outro")), ncol = 1) +
     coord_flip() +
     theme(
       axis.text.x = element_text(size = 2),
@@ -272,3 +275,78 @@ facet_contrato_likert_by <- function(survey_data, group_category = NULL) {
     )
 }
 
+
+# Retorna os dados em quantidades por valor
+get_survey_answers_by_question <- function(survey_data, question) {
+  answers <- get_survey_answers(survey_data)
+  answers |> 
+    select(Q01) |> 
+    count(Q01) |> 
+    mutate(prop = scales::percent(n/sum(n))) |> 
+    arrange(Q01) |> 
+    gt()
+}
+
+plot_bar_CI <- function(survey_data, question) {
+  the_title <-
+    survey_data |>
+    select(starts_with(question)) |>
+    names()
+  
+  q4 <-
+    survey_data |>
+    select(starts_with(question))
+  names(q4) <- question
+  q4 <-
+    q4 |>
+    count(!!sym(question)) |>
+    pull(n)
+  q4
+  
+  tq4 <-
+    as_tibble(MultinomCI(q4)) |>
+    mutate(answer = as.character(row_number()))
+  
+  tq4 |>
+    ggplot(aes(answer, est, fill = answer)) +
+    geom_col() +
+    geom_text(
+      aes(label = scales::percent(round(est, 2))),
+      vjust = -1,
+      hjust = -0.2,
+      size = 3
+    ) +
+    geom_pointrange(aes(ymin = lwr.ci, ymax = upr.ci), color = "#CA7700") +
+    scale_y_continuous(labels = scales::percent_format(),
+                       breaks = c(0, 0.2, 0.4, 0.6)) +
+    scale_fill_manual(values = lik_colors) +
+    theme_minimal() +
+    labs(title =   the_title,
+         x = NULL,
+         y = NULL) +
+    theme(
+      axis.text.y = element_blank(),
+      legend.position = "none",
+      panel.grid = element_blank()
+    ) +
+    coord_flip() +
+    geom_text(aes(
+      x = 1,
+      y = 0,
+      label = "Discordo totalmente ",
+      vjust = 1,
+      hjust = 1
+    ),
+    color = lik_colors[1]) +
+    geom_text(aes(
+      x = 7,
+      y = 0,
+      label = "Concordo totalmente ",
+      vjust = 1,
+      hjust = 1
+    ),
+    color = lik_colors[7]) +
+    expand_limits(y = -0.2)
+  
+  
+}
