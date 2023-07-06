@@ -20,12 +20,12 @@ plot_survey_by <- function(df, a_column) {
 # Colors for likert plot
 lik_colors = c(
   "1" = "#C71E1D",
-  "2" = "#D55457",
-  "3" = "#E48F8F",
-  "4" = "#B5AAB9",
-  "5" = "#748CA5",
-  "6" = "#17627B",
-  "7" = "#174664"
+  "2" = "#d95d76",
+  "3" = "#d298b3",
+  "4" = "#cdcccd",
+  "5" = "#bdafcf",
+  "6" = "#9299d8",
+  "7" = "#69a4d6"
 )
 
 plot_all_likert_data <- function(survey_data) {
@@ -89,11 +89,11 @@ plot_likert_by <- function(survey_data, group_category = NULL) {
       fct_rev(question),
       p,
       group = question,
-      label = paste0(as.character(round(100 * p, 1)), "%"),
+      #label = paste0(as.character(round(100 * p, 1)), "%"),
       fill = forcats::fct_rev(answer)
     )) +
     geom_col(position = "stack", width = 0.5) +
-    geom_text(size = 3, position = position_stack(vjust = 0.5), color = "white") +
+    geom_text(aes(label = scales::percent(round(p, 2))), size = 4, position = position_stack(vjust = 0.5), color = "white") +
     theme_minimal() +
     labs(title = "",
          x = NULL,
@@ -110,6 +110,7 @@ plot_likert_by <- function(survey_data, group_category = NULL) {
       axis.text.x = element_blank(),
       axis.title.x = element_blank(),
       panel.grid = element_blank(),
+      axis.text.y = element_text(size = 18),
       legend.position = "none"
     )
 }
@@ -287,6 +288,23 @@ get_survey_answers_by_question <- function(survey_data, question) {
     gt()
 }
 
+
+CI_table <- function(question){
+  answers <-
+    survey_data |>
+    select(starts_with(question))
+  names(answers) <- question
+  answers <-
+    answers |>
+    count(!!sym(question)) |> 
+    pull(n)
+  table_CI <-
+    as_tibble(MultinomCI(answers, conf.level = 0.95, method = "wilson")) |>
+    mutate(answer = as.character(row_number())) |> 
+    mutate(level = est - lwr.ci)
+}
+
+
 plot_bar_CI <- function(survey_data, question) {
   #question <- "Q09"
   the_title <-
@@ -350,5 +368,65 @@ plot_bar_CI <- function(survey_data, question) {
     expand_limits(y = -0.2)
   
   
+}
+
+plot_bar <- function(survey_data, question) {
+  question = "Q09"
+  the_title <-
+    survey_data |>
+    select(starts_with(question)) |>
+    names()
+  
+  q_data <-
+    survey_data |>
+    select(starts_with(question))
+  names(q_data) <- c("answer")
+  q_data <-
+    q_data |>
+    count(answer)
+  base <- tibble(
+    answer = as.character(1:7),
+    est = rep(0,7)
+  )
+  q_data <- 
+    base |> 
+    left_join(q_data, by = "answer") |> 
+    mutate(n = if_else(is.na(n), 0, n)) |> 
+    pull(n)
+  
+  t_q_data <-
+    as_tibble(MultinomCI(q_data, conf.level = 0.95, method = "wilson")) |>
+    mutate(answer = as.character(row_number()))
+  
+  
+  t_q_data |> 
+    ggplot(aes(answer, est, fill = answer)) +
+    geom_col() +
+    geom_text(aes(label = scales::percent(round(est, 3))),
+              vjust = -1, hjust = 0.5, size = 6) +
+    scale_y_continuous(labels = scales::percent_format(),
+                       breaks = c(0, 0.2, 0.4, 0.6)) +
+    scale_fill_manual(values = lik_colors) +
+    geom_text(aes(x = 1, y = 0, label = "Discordo totalmente"),
+                  vjust = 1, hjust = 0.4, size = 6, color = lik_colors[1]) +
+    geom_text(aes(x = dim(t_q_data)[1], y = 0, label = "Concordo totalmente"),
+                  vjust = 1, hjust = 0.6, size = 6, color = lik_colors[7]) +
+    expand_limits(y = c(0, 0.8)) +
+    theme_minimal() +
+    labs(title = the_title,
+         x = NULL,
+         y = NULL) +
+    theme(axis.text.y = element_blank(),
+          axis.text.x = element_blank(),
+          legend.position = "none",
+          panel.grid = element_blank(),
+          #plot.title = element_text(size = 20)
+          plot.title.position = "plot",
+          plot.title = element_textbox_simple(
+            size = 24,
+            padding = margin(5.5, 5.5, 5.5, 5.5),
+            margin = margin(0, 0, 5.5, 0),
+            fill = "cornsilk"
+          )) 
 }
 

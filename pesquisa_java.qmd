@@ -1,29 +1,22 @@
 ---
 title: "Projeto Java - Primeira Pesquisa"
-format: 
-  pptx:
-    reference-doc: mars_ppt.pptx
+format: pptx
 # revealjs
 editor: visual
 ---
 
-Este relatório contém a análise dos dados de **Consciência** e **Pré-disposição** 
-dos associados e temporários da fábrica da MARS Guararema em relação so projeto
-Java.
+Este relatório contém a análise dos dados de **Consciência** e **Pré-disposição** dos associados e temporários da fábrica da MARS Guararema em relação so projeto Java.
 
 Os dados foram coletados durante as semanas de P6W4 (11/06/2023) até P7W2 (30/06/2023).
 
-O método de coleta foi o de contribuição espontânia com divulgação através de 
-mensagens e cartazes na fábrica.
+O método de coleta foi o de contribuição espontânia com divulgação através de mensagens e cartazes na fábrica.
 
 ## Dimensões avaliadas na pesquisa
-::: {small}
-A medição da Consciência e Pré-disposição faz parte do modelo ADKAR de Gestão 
-de mundaça adotado globalmente pela MARS. 
 
-Nesta pesquisa detalhamos os elementos de Consciência (Awareness) e Pré-disposição
-(Desire) em sub-elementos com o intuito de prover maior direcionamento para as ações 
-de Gestão de Mudança:
+::: {small}
+A medição da Consciência e Pré-disposição faz parte do modelo ADKAR de Gestão de mundaça adotado globalmente pela MARS.
+
+Nesta pesquisa detalhamos os elementos de Consciência (Awareness) e Pré-disposição (Desire) em sub-elementos com o intuito de prover maior direcionamento para as ações de Gestão de Mudança:
 
 ::: columns
 ::: {.column width="50%"}
@@ -56,11 +49,12 @@ de Gestão de Mudança:
 Detalhes serão providos no corpo do relatório.
 :::
 
-## Respostas obtidas
+## Sumário
 
-Em relação ao número de respostas obtidas temos os seguintes números:
+A população pesquisa nesta data estava constituida por 394 pessoas.
+Sendo que houve a participação voluntária de 109, distribuídas em turnos, linhas e modalidades de contratos conforme apresentados a seguir.
 
-
+Os resultados apresentam uma margem de erro que varia de 3% a 7% conforme a questão, para um nível de confiança de 95%.
 
 ```{r}
 #| echo: false
@@ -186,44 +180,59 @@ plot_likert_by(survey_data, group_category = "turno")
 
 ```
 
-
 # Resultados por dimensão
 
 ## Visão
 
+
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
 
+# Gráficos de respostas
+library(stringi)
+library(ggtext)
+# questoes <- map_chr(1:15, ~ sprintf("Q%02d", .x))
+
+# map(questoes, ~ plot_bar(survey_data |> filter(across(.cols = `Q01 Tenho clareza dos benefícios com o projeto Java.`:`Q15 Eu me sinto capaz de trabalhar com automação.`, .fns  = ~ !is.na(.x))), .x))
+
+plot_bar(survey_data, "Q01")
+plot_bar(survey_data, "Q02")
+```
+
+### ...
+
+```{r}
+CI_table("Q01") |> 
+  gt()
+CI_table("Q02") |> 
+  gt()
 
 plot_likert_by(survey_data, c("Q01", "Q02")) 
-
-# answers <- get_survey_answers(survey_data)
-# answers |> 
-#   filter(!is.na(linha),
-#          linha %in% c("M&M", "SNICKERS", "TWIX")) |> 
-#   mutate(linha = fct_drop(linha)) |> 
-#   select(Q01) |> 
-#   table() 
-
-plot_bar_CI(survey_data, "Q01")
-plot_bar_CI(survey_data, "Q02")
 
 
 ```
 
-## Condução da Mudança
+## Gestão de Mudanças
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
 
-plot_likert_by(survey_data, c("Q03", "Q04"))
 
-plot_bar_CI(survey_data, "Q03")
-plot_bar_CI(survey_data, "Q04")
+plot_bar(survey_data, "Q03")
+plot_bar(survey_data, "Q04")
+
+
+CI_table("Q03") |> 
+  gt()
+CI_table("Q04") |> 
+  gt()
+
+plot_likert_by(survey_data, c("Q03", "Q04")) 
+
 ```
 
 ## Comunicação
@@ -233,16 +242,21 @@ plot_bar_CI(survey_data, "Q04")
 #| warning: false
 #| message: false
 
+plot_bar(survey_data, "Q05")
+plot_bar(survey_data |> 
+  filter(!is.na(`Q06 Eu me sinto informado em relação ao Projeto Java.`)), "Q06")
 
+CI_table("Q05") |> 
+  gt()
+CI_table("Q06") |> 
+  gt()
 
+  
 plot_likert_by(survey_data |> 
   filter(!is.na(`Q06 Eu me sinto informado em relação ao Projeto Java.`)), c("Q05", "Q06"))
 
-
-plot_bar_CI(survey_data, "Q05")
-plot_bar_CI(survey_data |> 
-  filter(!is.na(`Q06 Eu me sinto informado em relação ao Projeto Java.`)), "Q06")
 ```
+
 
 ## Liderança
 
@@ -251,11 +265,17 @@ plot_bar_CI(survey_data |>
 #| warning: false
 #| message: false
 
+plot_bar(survey_data, "Q09")
+plot_bar(survey_data, "Q10")
+
+
+CI_table("Q09") |> 
+  gt()
+CI_table("Q10") |> 
+  gt()
+
+
 plot_likert_by(survey_data, c("Q09", "Q10"))
-
-
-plot_bar_CI(survey_data, "Q09")
-plot_bar_CI(survey_data, "Q10")
 ```
 
 ## Participação
@@ -265,31 +285,46 @@ plot_bar_CI(survey_data, "Q10")
 #| warning: false
 #| message: false
 
+
+plot_bar(survey_data, "Q11")
+plot_bar(survey_data, "Q12")
+
+CI_table("Q11") |> 
+  gt()
+CI_table("Q12") |> 
+  gt()
+
 plot_likert_by(survey_data, c("Q11", "Q12"))
 
-
-plot_bar_CI(survey_data, "Q11")
-plot_bar_CI(survey_data, "Q12")
 ```
 
-## Intenção do Comportamento
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
 
+plot_bar(survey_data, "Q07")
+plot_bar(survey_data, "Q08")
+
+plot_bar(survey_data, "Q13")
+plot_bar(survey_data, "Q14")
+plot_bar(survey_data, "Q15")
+
+CI_table("Q07") |> 
+  gt()
+CI_table("Q08") |> 
+  gt()
+CI_table("Q13") |> 
+  gt()
+CI_table("Q14") |> 
+  gt()
+CI_table("Q15") |> 
+  gt()
+
 plot_likert_by(survey_data, c("Q07", "Q08", "Q13", "Q14", "Q15"))
-
-
-plot_bar_CI(survey_data, "Q07")
-plot_bar_CI(survey_data, "Q08")
-
-plot_bar_CI(survey_data, "Q13")
-plot_bar_CI(survey_data, "Q14")
-
-plot_bar_CI(survey_data, "Q15")
 ```
+
 
 As questões Q07 e Q08 buscam medir a **Atitude** em relação à mudança.
 As questões Q13 e Q14 buscam medir a **Norma Percebida** em relação à mudança.
@@ -334,8 +369,6 @@ survey_data |>
   as_raw_html()
 ```
 
-
-
 ```{r}
 #| echo: false
 #| warning: false
@@ -351,8 +384,6 @@ survey_data |>
   tab_options(column_labels.hidden = TRUE) |> 
   as_raw_html()
 ```
-
-
 
 ```{r}
 #| echo: false
